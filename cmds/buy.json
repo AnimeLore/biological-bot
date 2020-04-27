@@ -1,0 +1,30 @@
+{"1" : {
+"1":{"health" : 1, "bio" : 0, "resist": 0, "cost" : 150},
+"2":{"health" : 3, "bio" : 0, "resist": 0.1, "cost" : 300},
+"3":{"health" : 5, "bio" : 0.5, "resist": 0, "cost" : 500},
+"4":{"health" : 18, "bio" : 2, "resist": 0, "cost" : 1200},
+"5":{"health" : 38, "bio" : 4, "resist": 0, "cost" : 2450},
+"6":{"health" : 2, "bio" : 1, "resist": 0, "cost" : 120},
+"7":{"health" : 16, "bio" : 0, "resist": 2, "cost" : 5600},
+"8":{"health" : 6, "bio" : 2, "resist": 0, "cost" : 560},
+"9":{"health" : 56, "bio" : 0, "resist": 0, "cost" : 15600}
+},
+"2" : {"1":{"health" : -2, "bio" : -0.5, "resist": 0, "cost" : 750},
+"2":{"health" : -6, "bio" : -2, "resist": 0, "cost" : 4000},
+"3":{"health" : -1, "bio" : -3, "resist": 0, "cost" : 7000},
+"4":{"health" : -10, "bio" : -5, "resist": 0, "cost" : 11000},
+"5":{"health" : -15, "bio" : -8, "resist": 0, "cost" : 22300},
+"6":{"health" : -70, "bio" : -10, "resist": 0, "cost" : 120},
+"7":{"health" : -25, "bio" : -15, "resist": 0, "cost" : 43000},
+"8":{"health" : -70, "bio" : -18, "resist": 0, "cost" : 5600},
+"9":{"health" : 0, "bio" : -50, "resist": 0, "cost" : 256000}},
+"3" :{
+"1":{"health" : 0, "bio" : 0, "resist": 1, "cost" : 1600},
+"2":{"health" : 0, "bio" : 0, "resist": 5, "cost" : 25000},
+"3":{"health" : 0, "bio" : 0, "resist": 10, "cost" : 65000},
+"4":{"health" : 0, "bio" : 0, "resist": 25, "cost" : 150000}},
+"4":{
+"1":{"health" : 15, "bio" : -1, "resist": 3, "cost" : 15000},
+"2":{"health" : 25, "bio" : -3, "resist": 10, "cost" : 65000}
+}
+}
