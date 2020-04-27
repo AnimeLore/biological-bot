@@ -8,7 +8,7 @@ function random(min, max){
     min = min+1
     return Math.floor(Math.random() * (max - min)) + min;
 }
-var token = Config.token;
+var token = process.env.TOKEN;
 var prefix = Config.prefix;
 var timer_work = c.setInterval(function () {    
     var userData = JSON.parse(fs.readFileSync("./cmds/users.json","utf8"));
