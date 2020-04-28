@@ -16,7 +16,7 @@ dbClient.connect((err,client) => {
     if(err) throw err;
     const db = client.db("heroku_wckj39c7")
 var timer_work = c.setInterval(function () {    
-    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray((err,result)) => {
+    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray((err,result) => {
         if (err) throw err;
         userData = result[0].users
     });
