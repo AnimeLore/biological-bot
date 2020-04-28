@@ -1,10 +1,17 @@
 const Discord = module.require('discord.js');
 const fs = require('fs');
-module.exports.run = async (bot,message,args) => {
+module.exports.run = async (bot,message,args, db) => {
     let user = message.author.username;
     let userid = message.author.id;
-    let buyData = JSON.parse(fs.readFileSync("./cmds/buy.json","utf8"));
-    let userData = JSON.parse(fs.readFileSync("./cmds/users.json","utf8"));
+    if(userData[userid]){
+    var buyData = db.collection("all_json").find({"$oid": "5ea87ff37c213e209646171e"}).toArray(err,result => {
+        if (err) throw err;
+        buyData = result[0].buy
+});;
+    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray(err,result => {
+        if (err) throw err;
+        userData = result[0].users
+});
     if(!args[0] && !args[1]){
         var embed = new Discord.MessageEmbed() 
         .setTitle("Внешняя база ученых. Магазин.")
@@ -107,9 +114,7 @@ module.exports.run = async (bot,message,args) => {
                         if(err) console.log(err);
                     }
                 }
-                fs.writeFileSync("cmds/users.json",JSON.stringify(userData),(err)=>{
-                    if(err) console.log(err);
-                });
+                db.collection("all_json").update({"$oid": "5ea87f777c213e2096461711"}, {"users":userData}, true);
             } else {
                 message.channel.send("<@"+message.author.id+">, Не хватает денег.")
             }
@@ -118,7 +123,9 @@ module.exports.run = async (bot,message,args) => {
             }
         }
     }
-};
+}else {
+    message.channel.send("<@"+userid+">, Вы не зарегистрированы в базе испытуемых! Зарегистрируйтесь при помощи команды ;!start");
+}};
 module.exports.help = {
     name : "store"
 };

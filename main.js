@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const c = new Discord.Client();
 var Config = require("./cfg.json");
+const MongoClient = require('mongodb').MongoClient;
+var dbClient = new MongoClient("mongodb://<dbuser>:<dbpassword>@ds163016.mlab.com:63016/heroku_wckj39c7", { useNewUrlParser: true })
 c.commands = new Discord.Collection;
 const fs = require('fs');
 var i = 0;
@@ -10,9 +12,18 @@ function random(min, max){
 }
 var token = process.env.TOKEN;
 var prefix = Config.prefix;
+dbClient.connect(err,client => {
+    if(err) throw err;
+    const db = client.db("heroku_wckj39c7")
 var timer_work = c.setInterval(function () {    
-    var userData = JSON.parse(fs.readFileSync("./cmds/users.json","utf8"));
-    var workData = JSON.parse(fs.readFileSync("./cmds/workers.json","utf8"));
+    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray(err,result => {
+        if (err) throw err;
+        userData = result[0].users
+    });
+    var workData = db.collection("all_json").find({"$oid": "5ea87faa7c213e2096461716"}).toArray(err,result => {
+        if (err) throw err;
+        workData = result[0].workers
+    });;
     //var message = new Discord.Message(c,"TextChannel")
     for(key in workData){
         workData[key]["timer"] = workData[key]["timer"] - 60
@@ -22,7 +33,10 @@ var timer_work = c.setInterval(function () {
                 case 1:
                     var anomaly_type = random(0, 6)
                     var anomaly_many = random(0,5)
-                    var anomaly_art = JSON.parse(fs.readFileSync("./cmds/artefacts.json","utf8"));
+                    var anomaly_art = db.collection("all_json").find({"$oid": "5ea87fd37c213e209646171b"}).toArray(err,result => {
+                        if (err) throw err;
+                        anomaly_art = result[0].artefacts
+                    });;
                     var art_arr = ""
                     var cost = 0
                     var counter = 0;
@@ -161,7 +175,7 @@ var timer_work = c.setInterval(function () {
                     };
                     var embed = new Discord.MessageEmbed() 
                     .setTitle("Отчет об работе. Работа - Сталкерские тропы.")
-                    .addFields({name : "Статус установки сканеров:",value : "```Установлены```", inline : false},
+                    .addFields({name : "Статус проверки троп:",value : "```Проверенно```", inline : false},
                     {name : "Полученные деньги:",value : 1200, inline : false},
                     {name : "Необычное происшествие по дороге:",value : thing, inline : false});
                     var channel = c.channels.cache.get('703580927141478450');
@@ -238,7 +252,7 @@ var timer_work = c.setInterval(function () {
                     };
                     var embed = new Discord.MessageEmbed() 
                     .setTitle("Отчет об работе. Работа - Установка сканеров.")
-                    .addFields({name : "Статус проверки троп:",value : "```Проверенно```", inline : false},
+                    .addFields({name : "Статус установки сканеров:",value : "```Установлены```", inline : false},
                     {name : "Полученные деньги:",value : 500, inline : false},
                     {name : "Необычное происшествие по дороге:",value : thing, inline : false});
                     var channel = c.channels.cache.get('703580927141478450');
@@ -347,23 +361,22 @@ var timer_work = c.setInterval(function () {
             delete workData[userid]
         }
 
-    fs.writeFileSync("cmds/users.json",JSON.stringify(userData),err=>{
-        if(err) throw err;
-    });
-    fs.writeFileSync("cmds/workers.json",JSON.stringify(workData),err=>{
-        if(err) throw err;
-    });
+    db.collection("all_json").update({"$oid": "5ea87f777c213e2096461711"}, {"users":userData}, true);
+    db.collection("all_json").update({"$oid": "5ea87faa7c213e2096461716"}, {"workers":workData}, true);
 }
 },60000);
 var timer = c.setInterval(function () {   
-    var userData = JSON.parse(fs.readFileSync("./cmds/users.json","utf8"));
+    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray(err,result => {
+        if (err) throw err;
+        userData = result[0].users
+});
     //var message = new Discord.Message(c,"TextChannel")
     for(key in userData){
         userData[key]["timer"] = userData[key]["timer"] - 60
         if (userData[key]["timer"] === 0)
         { 
             if(userData[key]["resistance"] !== 0) { 
-                userData[key]["health"] = userData[key]["health"] - (userData[key]["damage"] * (userData[key]["resistance"]/100))
+                userData[key]["health"] = userData[key]["health"] - (userData[key]["damage"] - (userData[key]["damage"] * (userData[key]["resistance"]/100)))
             } else {
                 userData[key]["health"] = userData[key]["health"] - userData[key]["damage"]
             }
@@ -376,9 +389,7 @@ var timer = c.setInterval(function () {
                 userData[key]["timer"] = 3600
             }
         } 
-        fs.writeFileSync("cmds/users.json",JSON.stringify(userData),(err)=>{
-            if(err) console.log(err);
-        });
+        db.collection("all_json").update({"$oid": "5ea87f777c213e2096461711"}, {"users":userData}, true);
     }
 },60000)//время
 c.on('ready', () => {
@@ -404,7 +415,7 @@ c.on('message', async message => {
     if(!mText.startsWith(prefix)) return;
     var cmd = c.commands.get(comm.slice(prefix.length))
     args = args.filter(element => element !== "")
-    if(cmd) cmd.run(c,message,args);
+    if(cmd) cmd.run(c,message,args,db);
 });
-
+})
 c.login(token);

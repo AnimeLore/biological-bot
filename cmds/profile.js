@@ -1,10 +1,16 @@
 const Discord = module.require('discord.js');
 const fs = require('fs');
-module.exports.run = async (c,message,args) => {
+module.exports.run = async (c,message,args,db) => {
     let user = message.author.username;
     let userid = message.author.id;
-    let groupData = JSON.parse(fs.readFileSync("./cmds/groups.json","utf8"));
-    let userData = JSON.parse(fs.readFileSync("./cmds/users.json","utf8"));
+    var groupData = db.collection("all_json").find({"$oid": "5ea880427c213e209646176c"}).toArray(err,result => {
+        if (err) throw err;
+        groupData = result[0].groups
+});;
+var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray(err,result => {
+    if (err) throw err;
+    userData = result[0].users
+});
     if(userData[userid] !== undefined) {
         if(groupData[""+userData[userid].groupid]){
             userGroup = groupData[""+userData[userid].groupid].name;

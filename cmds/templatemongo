@@ -1,0 +1,26 @@
+var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray(err,result => {
+        if (err) throw err;
+        userData = result[0].users
+});
+var workData = db.collection("all_json").find({"$oid": "5ea87faa7c213e2096461716"}).toArray(err,result => {
+        if (err) throw err;
+        workData = result[0].workers
+});;
+var groupData = db.collection("all_json").find({"$oid": "5ea880427c213e209646176c"}).toArray(err,result => {
+        if (err) throw err;
+        groupData = result[0].groups
+});;
+var buyData = db.collection("all_json").find({"$oid": "5ea87ff37c213e209646171e"}).toArray(err,result => {
+        if (err) throw err;
+        buyData = result[0].buy
+});;
+var anomaly_art = db.collection("all_json").find({"$oid": "5ea87fd37c213e209646171b"}).toArray(err,result => {
+        if (err) throw err;
+        anomaly_art = result[0].artefacts
+});;
+________________________________________________________________________________________________
+
+db.collection("all_json").update({"$oid": "5ea87f777c213e2096461711"}, {"users":userData}, true);
+db.collection("all_json").update({"$oid": "5ea87faa7c213e2096461716"}, {"workers":workData}, true);
+db.collection("all_json").update({"$oid": "5ea880427c213e209646176c"}, {"groups":groupData}, true);
+db.collection("all_json").update({"$oid": "5ea87fd37c213e209646171b"}, {"buy":buyData}, true);
