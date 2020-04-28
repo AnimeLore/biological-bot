@@ -3,7 +3,7 @@ const fs = require('fs');
 module.exports.run = async (bot,message,args,db) => {
     let user = message.author.username;
     let userid = message.author.id;
-    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray(err,result => {
+    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray((err,result) => {
         if (err) throw err;
         userData = result[0].users
 });

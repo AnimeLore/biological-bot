@@ -12,15 +12,15 @@ function random(min, max){
 }
 var token = process.env.TOKEN;
 var prefix = Config.prefix;
-dbClient.connect(err,client => {
+dbClient.connect((err,client) => {
     if(err) throw err;
     const db = client.db("heroku_wckj39c7")
 var timer_work = c.setInterval(function () {    
-    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray(err,result => {
+    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray((err,result)) => {
         if (err) throw err;
         userData = result[0].users
     });
-    var workData = db.collection("all_json").find({"$oid": "5ea87faa7c213e2096461716"}).toArray(err,result => {
+    var workData = db.collection("all_json").find({"$oid": "5ea87faa7c213e2096461716"}).toArray((err,result) => {
         if (err) throw err;
         workData = result[0].workers
     });;
@@ -33,7 +33,7 @@ var timer_work = c.setInterval(function () {
                 case 1:
                     var anomaly_type = random(0, 6)
                     var anomaly_many = random(0,5)
-                    var anomaly_art = db.collection("all_json").find({"$oid": "5ea87fd37c213e209646171b"}).toArray(err,result => {
+                    var anomaly_art = db.collection("all_json").find({"$oid": "5ea87fd37c213e209646171b"}).toArray((err,result) => {
                         if (err) throw err;
                         anomaly_art = result[0].artefacts
                     });;
@@ -366,7 +366,7 @@ var timer_work = c.setInterval(function () {
 }
 },60000);
 var timer = c.setInterval(function () {   
-    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray(err,result => {
+    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray((err,result) => {
         if (err) throw err;
         userData = result[0].users
 });

@@ -4,15 +4,15 @@ module.exports.run = async (bot,message,args, db) => {
     let user = message.author.username;
     let userid = message.author.id;
     if(userData[userid]){
-    var buyData = db.collection("all_json").find({"$oid": "5ea87ff37c213e209646171e"}).toArray(err,result => {
+    var buyData = db.collection("all_json").find({"$oid": "5ea87ff37c213e209646171e"}).toArray((err,result) => {
         if (err) throw err;
         buyData = result[0].buy
 });;
-    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray(err,result => {
+    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray((err,result) => {
         if (err) throw err;
         userData = result[0].users
 });
-    var workData = db.collection("all_json").find({"$oid": "5ea87faa7c213e2096461716"}).toArray(err,result => {
+    var workData = db.collection("all_json").find({"$oid": "5ea87faa7c213e2096461716"}).toArray((err,result) => {
         if (err) throw err;
         workData = result[0].workers
 });;

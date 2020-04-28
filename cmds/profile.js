@@ -3,11 +3,11 @@ const fs = require('fs');
 module.exports.run = async (c,message,args,db) => {
     let user = message.author.username;
     let userid = message.author.id;
-    var groupData = db.collection("all_json").find({"$oid": "5ea880427c213e209646176c"}).toArray(err,result => {
+    var groupData = db.collection("all_json").find({"$oid": "5ea880427c213e209646176c"}).toArray((err,result) => {
         if (err) throw err;
         groupData = result[0].groups
 });;
-var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray(err,result => {
+var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray((err,result) => {
     if (err) throw err;
     userData = result[0].users
 });
