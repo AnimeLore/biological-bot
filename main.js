@@ -417,5 +417,7 @@ c.on('message', async message => {
     args = args.filter(element => element !== "")
     if(cmd) cmd.run(c,message,args,db);
 });
+
 })
 c.login(token);
+
