@@ -1,9 +1,23 @@
 const Discord = require('discord.js');
 const c = new Discord.Client();
 var Config = require("./cfg.json");
-const MongoClient = require('mongodb').MongoClient;
-var dbClient = new MongoClient("mongodb://heroku_wckj39c7:heroku_wckj39c712@ds163016.mlab.com:63016/heroku_wckj39c7", { useNewUrlParser: true })
 c.commands = new Discord.Collection;
+const mysql = require("mysql2");
+const connection = mysql.createConnection({
+  host: "q7cxv1zwcdlw7699.chr7pe7iynqr.eu-west-1.rds.amazonaws.com",
+  user: "ank5d1vagrtoctau",
+  database: "itk2pws4wklje8ao",
+  password: "p073xlnvhojp6y2k",
+  port : "3306"
+});
+connection.connect(function(err){
+    if (err) {
+      return console.error("Ошибка: " + err.message);
+    }
+    else{
+      console.log("Подключение к серверу MySQL успешно установлено");
+    }
+});
 const fs = require('fs');
 var i = 0;
 function random(min, max){
@@ -12,18 +26,41 @@ function random(min, max){
 }
 var token = process.env.TOKEN;
 var prefix = Config.prefix;
-dbClient.connect((err,client) => {
-    if(err) throw err;
-    const db = client.db("heroku_wckj39c7")
 var timer_work = c.setInterval(function () {    
-    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray((err,result) => {
-        if (err) throw err;
-        userData = result[0].users
+    var userData;
+    connection.query(`SELECT * FROM users`, function(err, results) {
+        if(err) console.log(err);
+        let results1 = {}
+        for(let i = 0; i < results.length; i++){
+        let results2 = JSON.stringify(results[i])
+        eval("results2 =" + results2)
+        results1[results2.userid] = {
+            health : results2.health,
+            damage : results2.damage,
+            resistance : results2.resistance,
+            money : results2.money,
+            medkitused : results2.medkitused,
+            donate : results2.donate,
+            timer : results2.timer,
+            groupid : results2.groupid
+        }
+    }
+        userData = results1
     });
-    var workData = db.collection("all_json").find({"$oid": "5ea87faa7c213e2096461716"}).toArray((err,result) => {
-        if (err) throw err;
-        workData = result[0].workers
-    });;
+    var workData;
+connection.query(`SELECT * FROM workers`, function(err, results) {
+    if(err) console.log(err);
+    let results1 = {}
+    for(let i = 0; i < results.length; i++){
+    let results2 = JSON.stringify(results[i])
+    eval("results2 =" + results2)
+    results1[results2.userid] = {
+        timer : results2.timer,
+        id : results2.id
+    }
+}
+    workData = results1
+});
     //var message = new Discord.Message(c,"TextChannel")
     for(key in workData){
         workData[key]["timer"] = workData[key]["timer"] - 60
@@ -33,10 +70,7 @@ var timer_work = c.setInterval(function () {
                 case 1:
                     var anomaly_type = random(0, 6)
                     var anomaly_many = random(0,5)
-                    var anomaly_art = db.collection("all_json").find({"$oid": "5ea87fd37c213e209646171b"}).toArray((err,result) => {
-                        if (err) throw err;
-                        anomaly_art = result[0].artefacts
-                    });;
+                    var anomaly_art = require('./cmds/artefacts.json')
                     var art_arr = ""
                     var cost = 0
                     var counter = 0;
@@ -361,15 +395,40 @@ var timer_work = c.setInterval(function () {
             delete workData[userid]
         }
 
-    db.collection("all_json").update({"$oid": "5ea87f777c213e2096461711"}, {"users":userData}, true);
-    db.collection("all_json").update({"$oid": "5ea87faa7c213e2096461716"}, {"workers":workData}, true);
+        for (key in userData){
+            connection.query('REPLACE INTO users SET health = '+userData[key].health+', damage = '+userData[key].damage+', resistance = '+userData[key].resistance+', money = '+userData[key].money+', medkitused = '+userData[key].medkitused+', donate = '+userData[key].donate+', timer = '+userData[key].timer+', groupid = '+userData[key].groupid+', userid = '+key, function(err, results) {
+                if(err) console.log(err);
+                console.log(results);
+            });
+    }
+    for(key in workData){
+        connection.query('REPLACE INTO workers SET userid = '+key+', id = '+workData[key].id+', timer = '+workData[key].timer, function(err, results) {
+            if(err) console.log(err);
+            console.log(results);
+        })};
 }
 },60000);
 var timer = c.setInterval(function () {   
-    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray((err,result) => {
-        if (err) throw err;
-        userData = result[0].users
-});
+    var userData;
+    connection.query(`SELECT * FROM users`, function(err, results) {
+        if(err) console.log(err);
+        let results1 = {}
+        for(let i = 0; i < results.length; i++){
+        let results2 = JSON.stringify(results[i])
+        eval("results2 =" + results2)
+        results1[results2.userid] = {
+            health : results2.health,
+            damage : results2.damage,
+            resistance : results2.resistance,
+            money : results2.money,
+            medkitused : results2.medkitused,
+            donate : results2.donate,
+            timer : results2.timer,
+            groupid : results2.groupid
+        }
+    }
+        userData = results1
+    });
     //var message = new Discord.Message(c,"TextChannel")
     for(key in userData){
         userData[key]["timer"] = userData[key]["timer"] - 60
@@ -389,7 +448,12 @@ var timer = c.setInterval(function () {
                 userData[key]["timer"] = 3600
             }
         } 
-        db.collection("all_json").update({"$oid": "5ea87f777c213e2096461711"}, {"users":userData}, true);
+        for (key in userData){
+            connection.query('REPLACE INTO users SET health = '+userData[key].health+', damage = '+userData[key].damage+', resistance = '+userData[key].resistance+', money = '+userData[key].money+', medkitused = '+userData[key].medkitused+', donate = '+userData[key].donate+', timer = '+userData[key].timer+', groupid = '+userData[key].groupid+', userid = '+key, function(err, results) {
+                if(err) console.log(err);
+                console.log(results);
+            });
+    }
     }
 },60000)//время
 c.on('ready', () => {
@@ -415,9 +479,8 @@ c.on('message', async message => {
     if(!mText.startsWith(prefix)) return;
     var cmd = c.commands.get(comm.slice(prefix.length))
     args = args.filter(element => element !== "")
-    if(cmd) cmd.run(c,message,args,db);
+    if(cmd) cmd.run(c,message,args);
 });
 
-})
 c.login(token);
 

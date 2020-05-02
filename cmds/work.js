@@ -1,21 +1,43 @@
 const Discord = module.require('discord.js');
 const fs = require('fs');
-module.exports.run = async (bot,message,args, db) => {
+module.exports.run = async (bot,message,args) => {
     let user = message.author.username;
     let userid = message.author.id;
     if(userData[userid]){
-    var buyData = db.collection("all_json").find({"$oid": "5ea87ff37c213e209646171e"}).toArray((err,result) => {
-        if (err) throw err;
-        buyData = result[0].buy
-});;
-    var userData = db.collection("all_json").find({"$oid": "5ea87f777c213e2096461711"}).toArray((err,result) => {
-        if (err) throw err;
-        userData = result[0].users
+    var userData;
+    connection.query(`SELECT * FROM users`, function(err, results) {
+        if(err) console.log(err);
+        let results1 = {}
+        for(let i = 0; i < results.length; i++){
+        let results2 = JSON.stringify(results[i])
+        eval("results2 =" + results2)
+        results1[results2.userid] = {
+            health : results2.health,
+            damage : results2.damage,
+            resistance : results2.resistance,
+            money : results2.money,
+            medkitused : results2.medkitused,
+            donate : results2.donate,
+            timer : results2.timer,
+            groupid : results2.groupid
+        }
+    }
+        var userData = results1
+    });
+    var workData;
+connection.query(`SELECT * FROM workers`, function(err, results) {
+    if(err) console.log(err);
+    let results1 = {}
+    for(let i = 0; i < results.length; i++){
+    let results2 = JSON.stringify(results[i])
+    eval("results2 =" + results2)
+    results1[results2.userid] = {
+        timer : results2.timer,
+        id : results2.id
+    }
+}
+    workData = results1
 });
-    var workData = db.collection("all_json").find({"$oid": "5ea87faa7c213e2096461716"}).toArray((err,result) => {
-        if (err) throw err;
-        workData = result[0].workers
-});;
     if(workData[userid]){
         message.channel.send("<@"+message.author.id+">, Вы уже находитесь на задании.")
     }else {
@@ -60,7 +82,11 @@ module.exports.run = async (bot,message,args, db) => {
                 message.channel.send(embed);
                 break;
     }
-    db.collection("all_json").update({"$oid": "5ea87faa7c213e2096461716"}, {"workers":workData}, true);
+    for(key in workData){
+        connection.query('REPLACE INTO workers SET userid = '+key+', id = '+workData[key].id+', timer = '+workData[key].timer, function(err, results) {
+            if(err) console.log(err);
+            console.log(results);
+        });}
 }
 
 } else {
