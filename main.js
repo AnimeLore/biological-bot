@@ -479,7 +479,7 @@ c.on('message', async message => {
     if(!mText.startsWith(prefix)) return;
     var cmd = c.commands.get(comm.slice(prefix.length))
     args = args.filter(element => element !== "")
-    if(cmd) cmd.run(c,message,args);
+    if(cmd) cmd.run(c,message,args,connection);
 });
 
 c.login(token);
