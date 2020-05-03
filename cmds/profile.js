@@ -1,6 +1,8 @@
 const Discord = module.require('discord.js');
 const fs = require('fs');
-module.exports.run = async (c,message,args,connection) => {
+var connection;
+module.exports.run = async (c,message,args,connect) => {
+    connection = connect
     let user = message.author.username;
     let userid = message.author.id;
     var groupData = getGroupData()
