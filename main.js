@@ -2,22 +2,14 @@ const Discord = require('discord.js');
 const c = new Discord.Client();
 var Config = require("./cfg.json");
 c.commands = new Discord.Collection;
-const mysql = require("mysql2");
-const connection = mysql.createConnection({
-  host: "q7cxv1zwcdlw7699.chr7pe7iynqr.eu-west-1.rds.amazonaws.com",
-  user: "ank5d1vagrtoctau",
-  database: "itk2pws4wklje8ao",
-  password: "p073xlnvhojp6y2k",
-  port : "3306"
-});
-connection.connect(function(err){
-    if (err) {
-      return console.error("Ошибка: " + err.message);
-    }
-    else{
-      console.log("Подключение к серверу MySQL успешно установлено");
-    }
-});
+const mysql = require("sync-mysql");
+const connection = new mysql({
+    host: "q7cxv1zwcdlw7699.chr7pe7iynqr.eu-west-1.rds.amazonaws.com",
+    user: "ank5d1vagrtoctau",
+    database: "itk2pws4wklje8ao",
+    password: "p073xlnvhojp6y2k",
+    port : "3306"
+  });
 const fs = require('fs');
 var i = 0;
 function random(min, max){
@@ -27,40 +19,8 @@ function random(min, max){
 var token = process.env.TOKEN;
 var prefix = Config.prefix;
 var timer_work = c.setInterval(function () {    
-    var userData;
-    connection.query(`SELECT * FROM users`, function(err, results) {
-        if(err) console.log(err);
-        let results1 = {}
-        for(let i = 0; i < results.length; i++){
-        let results2 = JSON.stringify(results[i])
-        eval("results2 =" + results2)
-        results1[results2.userid] = {
-            health : results2.health,
-            damage : results2.damage,
-            resistance : results2.resistance,
-            money : results2.money,
-            medkitused : results2.medkitused,
-            donate : results2.donate,
-            timer : results2.timer,
-            groupid : results2.groupid
-        }
-    }
-        userData = results1
-    });
-    var workData;
-connection.query(`SELECT * FROM workers`, function(err, results) {
-    if(err) console.log(err);
-    let results1 = {}
-    for(let i = 0; i < results.length; i++){
-    let results2 = JSON.stringify(results[i])
-    eval("results2 =" + results2)
-    results1[results2.userid] = {
-        timer : results2.timer,
-        id : results2.id
-    }
-}
-    workData = results1
-});
+    var userData = getUserData()
+    var workData = getWorkData()
     //var message = new Discord.Message(c,"TextChannel")
     for(key in workData){
         workData[key]["timer"] = workData[key]["timer"] - 60
@@ -394,41 +354,12 @@ connection.query(`SELECT * FROM workers`, function(err, results) {
             }
             delete workData[userid]
         }
-
-        for (key in userData){
-            connection.query('REPLACE INTO users SET health = '+userData[key].health+', damage = '+userData[key].damage+', resistance = '+userData[key].resistance+', money = '+userData[key].money+', medkitused = '+userData[key].medkitused+', donate = '+userData[key].donate+', timer = '+userData[key].timer+', groupid = '+userData[key].groupid+', userid = '+key, function(err, results) {
-                if(err) console.log(err);
-                console.log(results);
-            });
     }
-    for(key in workData){
-        connection.query('REPLACE INTO workers SET userid = '+key+', id = '+workData[key].id+', timer = '+workData[key].timer, function(err, results) {
-            if(err) console.log(err);
-            console.log(results);
-        })};
-}
+        saveUserData(userData)
+        saveWorkData(workData)
 },60000);
 var timer = c.setInterval(function () {   
-    var userData;
-    connection.query(`SELECT * FROM users`, function(err, results) {
-        if(err) console.log(err);
-        let results1 = {}
-        for(let i = 0; i < results.length; i++){
-        let results2 = JSON.stringify(results[i])
-        eval("results2 =" + results2)
-        results1[results2.userid] = {
-            health : results2.health,
-            damage : results2.damage,
-            resistance : results2.resistance,
-            money : results2.money,
-            medkitused : results2.medkitused,
-            donate : results2.donate,
-            timer : results2.timer,
-            groupid : results2.groupid
-        }
-    }
-        userData = results1
-    });
+    var userData = getUserData()
     //var message = new Discord.Message(c,"TextChannel")
     for(key in userData){
         userData[key]["timer"] = userData[key]["timer"] - 60
@@ -448,12 +379,7 @@ var timer = c.setInterval(function () {
                 userData[key]["timer"] = 3600
             }
         } 
-        for (key in userData){
-            connection.query('REPLACE INTO users SET health = '+userData[key].health+', damage = '+userData[key].damage+', resistance = '+userData[key].resistance+', money = '+userData[key].money+', medkitused = '+userData[key].medkitused+', donate = '+userData[key].donate+', timer = '+userData[key].timer+', groupid = '+userData[key].groupid+', userid = '+key, function(err, results) {
-                if(err) console.log(err);
-                console.log(results);
-            });
-    }
+        saveUserData(userData)
     }
 },60000)//время
 c.on('ready', () => {
@@ -481,6 +407,66 @@ c.on('message', async message => {
     args = args.filter(element => element !== "")
     if(cmd) cmd.run(c,message,args,connection);
 });
+function getUserData(){
+    let results = connection.query(`SELECT * FROM users`)
+    let userData = {}
+    for(let i = 0; i < results.length; i++){
+      let results2 = JSON.stringify(results[i])
+      eval("results2 =" + results2)
+      userData[results2.userid] = {
+                health : results2.health,
+                damage : results2.damage,
+                resistance : results2.resistance,
+                money : results2.money,
+                medkitused : results2.medkitused,
+                donate : results2.donate,
+                timer : results2.timer,
+                groupid : results2.groupid
+            }
+        console.log(userData)
+        }
+        return userData
+};
+function getWorkData(){
+    let results = connection.query(`SELECT * FROM workers`)
+    let workData = {}
+    for(let i = 0; i < results.length; i++){
+        let results2 = JSON.stringify(results[i])
+        eval("results2 =" + results2)
+        workData[results2.userid] = {
+            timer : results2.timer,
+            id : results2.id
+        }
+    }
+    return workData
+}
+function getGroupData(){
+    let results = connection.query(`SELECT * FROM groups`)
+    let groupData = {}
+    for(let i = 0; i < results.length; i++){
+        let results2 = JSON.stringify(results[i])
+        eval("results2 =" + results2)
+        eval("results2.players = "+results2.players)
+        groupData[results2.id] = {
+            name : results2.name,
+            players : results2.players,
+            creator : results2.creator
+        }
+    }
+    return groupData
+}
+function saveUserData(userData){
+    for (key in userData){
+        connection.query('REPLACE INTO users SET health = '+userData[key].health+', damage = '+userData[key].damage+', resistance = '+userData[key].resistance+', money = '+userData[key].money+', medkitused = '+userData[key].medkitused+', donate = '+userData[key].donate+', timer = '+userData[key].timer+', groupid = '+userData[key].groupid+', userid = '+key);
+}};
+function saveWorkData(workData){
+    for(key in workData){
+        connection.query('REPLACE INTO workers SET userid = '+key+', id = '+workData[key].id+', timer = '+workData[key].timer)
+}};
+function saveGroupData(groupData){
+  for (sgid in groupData){
+    connection.query('REPLACE INTO groups SET id = '+sgid+', name = '+groupData["" + sgid].name+', players = '+groupData["" + sgid].players+'creator = '+groupData["" + sgid].creator);
+}};
 
 c.login(token);
 
