@@ -128,62 +128,26 @@ module.exports.help = {
     name : "store"
 };
 function getUserData(){
-    let results = connection.query(`SELECT * FROM users`)
-    let userData = {}
-    for(let i = 0; i < results.length; i++){
-      let results2 = JSON.stringify(results[i])
-      eval("results2 =" + results2)
-      userData[results2.userid] = {
-                health : results2.health,
-                damage : results2.damage,
-                resistance : results2.resistance,
-                money : results2.money,
-                medkitused : results2.medkitused,
-                donate : results2.donate,
-                timer : results2.timer,
-                groupid : results2.groupid
-            }
-        console.log(userData)
-        }
-        return userData
+    return JSON.parse(fs.readFileSync("./cmds/users.json","utf8"))
 };
 function getWorkData(){
-    let results = connection.query(`SELECT * FROM workers`)
-    let workData = {}
-    for(let i = 0; i < results.length; i++){
-        let results2 = JSON.stringify(results[i])
-        eval("results2 =" + results2)
-        workData[results2.userid] = {
-            timer : results2.timer,
-            id : results2.id
-        }
-    }
-    return workData
+return JSON.parse(fs.readFileSync("./cmds/workers.json","utf8"))
 }
 function getGroupData(){
-    let results = connection.query(`SELECT * FROM groups`)
-    let groupData = {}
-    for(let i = 0; i < results.length; i++){
-        let results2 = JSON.stringify(results[i])
-        eval("results2 =" + results2)
-        eval("results2.players = "+results2.players)
-        groupData[results2.id] = {
-            name : results2.name,
-            players : results2.players,
-            creator : results2.creator
-        }
-    }
-    return groupData
+return JSON.parse(fs.readFileSync("./cmds/groups.json","utf8"));
 }
 function saveUserData(userData){
-    for (key in userData){
-        connection.query('REPLACE INTO users SET health = '+userData[key].health+', damage = '+userData[key].damage+', resistance = '+userData[key].resistance+', money = '+userData[key].money+', medkitused = '+userData[key].medkitused+', donate = '+userData[key].donate+', timer = '+userData[key].timer+', groupid = '+userData[key].groupid+', userid = '+key);
-}};
+fs.writeFileSync("cmds/users.json",JSON.stringify(userData),err=>{
+    if(err) throw err;
+});
+};
 function saveWorkData(workData){
-    for(key in workData){
-        connection.query('REPLACE INTO workers SET userid = '+key+', id = '+workData[key].id+', timer = '+workData[key].timer)
-}};
+fs.writeFileSync("cmds/workers.json",JSON.stringify(workData),err=>{
+    if(err) throw err;
+});
+};
 function saveGroupData(groupData){
-  for (sgid in groupData){
-    connection.query('REPLACE INTO groups SET id = '+sgid+', name = '+groupData["" + sgid].name+', players = '+groupData["" + sgid].players+'creator = '+groupData["" + sgid].creator);
-}};
+fs.writeFileSync("cmds/groups.json",JSON.stringify(workData),err=>{
+    if(err) throw err;
+});
+};

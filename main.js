@@ -2,21 +2,13 @@ const Discord = require('discord.js');
 const c = new Discord.Client();
 var Config = require("./cfg.json");
 c.commands = new Discord.Collection;
-const mysql = require("sync-mysql");
-const connection = new mysql({
-    host: "q7cxv1zwcdlw7699.chr7pe7iynqr.eu-west-1.rds.amazonaws.com",
-    user: "ank5d1vagrtoctau",
-    database: "itk2pws4wklje8ao",
-    password: "p073xlnvhojp6y2k",
-    port : "3306"
-  });
 const fs = require('fs');
 var i = 0;
 function random(min, max){
     min = min+1
     return Math.floor(Math.random() * (max - min)) + min;
 }
-var token = process.env.TOKEN;
+var token = "NzAzNTk5NDkzNDI5NTkyMTI4.XqdNDA.q1uYYGCucGu0ES6L3aFvsg_bbVE";
 var prefix = Config.prefix;
 var timer_work = c.setInterval(function () {    
     var userData = getUserData()
@@ -405,68 +397,32 @@ c.on('message', async message => {
     if(!mText.startsWith(prefix)) return;
     var cmd = c.commands.get(comm.slice(prefix.length))
     args = args.filter(element => element !== "")
-    if(cmd) cmd.run(c,message,args,connection);
+    if(cmd) cmd.run(c,message,args,"gay");
 });
 function getUserData(){
-    let results = connection.query(`SELECT * FROM users`)
-    let userData = {}
-    for(let i = 0; i < results.length; i++){
-      let results2 = JSON.stringify(results[i])
-      eval("results2 =" + results2)
-      userData[results2.userid] = {
-                health : results2.health,
-                damage : results2.damage,
-                resistance : results2.resistance,
-                money : results2.money,
-                medkitused : results2.medkitused,
-                donate : results2.donate,
-                timer : results2.timer,
-                groupid : results2.groupid
-            }
-        console.log(userData)
-        }
-        return userData
+        return JSON.parse(fs.readFileSync("./cmds/users.json","utf8"))
 };
 function getWorkData(){
-    let results = connection.query(`SELECT * FROM workers`)
-    let workData = {}
-    for(let i = 0; i < results.length; i++){
-        let results2 = JSON.stringify(results[i])
-        eval("results2 =" + results2)
-        workData[results2.userid] = {
-            timer : results2.timer,
-            id : results2.id
-        }
-    }
-    return workData
+    return JSON.parse(fs.readFileSync("./cmds/workers.json","utf8"))
 }
 function getGroupData(){
-    let results = connection.query(`SELECT * FROM groups`)
-    let groupData = {}
-    for(let i = 0; i < results.length; i++){
-        let results2 = JSON.stringify(results[i])
-        eval("results2 =" + results2)
-        eval("results2.players = "+results2.players)
-        groupData[results2.id] = {
-            name : results2.name,
-            players : results2.players,
-            creator : results2.creator
-        }
-    }
-    return groupData
+    return JSON.parse(fs.readFileSync("./cmds/groups.json","utf8"));
 }
 function saveUserData(userData){
-    for (key in userData){
-        connection.query('REPLACE INTO users SET health = '+userData[key].health+', damage = '+userData[key].damage+', resistance = '+userData[key].resistance+', money = '+userData[key].money+', medkitused = '+userData[key].medkitused+', donate = '+userData[key].donate+', timer = '+userData[key].timer+', groupid = '+userData[key].groupid+', userid = '+key);
-}};
+    fs.writeFileSync("cmds/users.json",JSON.stringify(userData),err=>{
+        if(err) throw err;
+    });
+};
 function saveWorkData(workData){
-    for(key in workData){
-        connection.query('REPLACE INTO workers SET userid = '+key+', id = '+workData[key].id+', timer = '+workData[key].timer)
-}};
+    fs.writeFileSync("cmds/workers.json",JSON.stringify(workData),err=>{
+        if(err) throw err;
+    });
+};
 function saveGroupData(groupData){
-  for (sgid in groupData){
-    connection.query('REPLACE INTO groups SET id = '+sgid+', name = '+groupData["" + sgid].name+', players = '+groupData["" + sgid].players+'creator = '+groupData["" + sgid].creator);
-}};
+    fs.writeFileSync("cmds/groups.json",JSON.stringify(workData),err=>{
+        if(err) throw err;
+    });
+};
 
 c.login(token);
 

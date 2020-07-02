@@ -5,10 +5,9 @@ module.exports.run = async (bot,message,args,connect) => {
     connection = connect
     let user = message.author.username;
     let userid = message.author.id;
+    var userData = getUserData()
+    var groupData = getGroupData()
     if(userData){
-        var userData = getUserData()
-    
-        var groupData = getGroupData()
     if(!args[0] && !args[1]){
     var embed = new Discord.MessageEmbed() 
     .setTitle("Список действий.")
@@ -29,12 +28,19 @@ module.exports.run = async (bot,message,args,connect) => {
                     for (var key in groupData) {
                         counter++;
                     }
+                    fullname = ""
+                    for(i = 1; i<=args.length-1;i++){
+                        fullname = fullname+" "+args[i]
+                    }
+                    fullname = fullname.trim()
                         groupData[counter+1] = {
-                            "name":args[1],"players":[userid],"creator":userid
+                            "name":fullname,"players":[userid],"creator":userid
                         }
+                        userData[userid].groupid = counter+1
                         userData[userid].money = userData[userid].money - 50000
                         saveGroupData(groupData)
                         saveUserData(userData)
+                        message.channel.send("<@"+message.author.id+">, группировка '"+fullname+"' была успешно создана.")
                     } else{
                         message.channel.send("<@"+message.author.id+">, Ошибка. Не достаточно денег.")
                     }
@@ -97,62 +103,26 @@ module.exports.help = {
     name : "actions"
 };
 function getUserData(){
-    let results = connection.query(`SELECT * FROM users`)
-    let userData = {}
-    for(let i = 0; i < results.length; i++){
-      let results2 = JSON.stringify(results[i])
-      eval("results2 =" + results2)
-      userData[results2.userid] = {
-                health : results2.health,
-                damage : results2.damage,
-                resistance : results2.resistance,
-                money : results2.money,
-                medkitused : results2.medkitused,
-                donate : results2.donate,
-                timer : results2.timer,
-                groupid : results2.groupid
-            }
-        console.log(userData)
-        }
-        return userData
+    return JSON.parse(fs.readFileSync("./cmds/users.json","utf8"))
 };
 function getWorkData(){
-    let results = connection.query(`SELECT * FROM workers`)
-    let workData = {}
-    for(let i = 0; i < results.length; i++){
-        let results2 = JSON.stringify(results[i])
-        eval("results2 =" + results2)
-        workData[results2.userid] = {
-            timer : results2.timer,
-            id : results2.id
-        }
-    }
-    return workData
+return JSON.parse(fs.readFileSync("./cmds/workers.json","utf8"))
 }
 function getGroupData(){
-    let results = connection.query(`SELECT * FROM groups`)
-    let groupData = {}
-    for(let i = 0; i < results.length; i++){
-        let results2 = JSON.stringify(results[i])
-        eval("results2 =" + results2)
-        eval("results2.players = "+results2.players)
-        groupData[results2.id] = {
-            name : results2.name,
-            players : results2.players,
-            creator : results2.creator
-        }
-    }
-    return groupData
+return JSON.parse(fs.readFileSync("./cmds/groups.json","utf8"));
 }
 function saveUserData(userData){
-    for (key in userData){
-        connection.query('REPLACE INTO users SET health = '+userData[key].health+', damage = '+userData[key].damage+', resistance = '+userData[key].resistance+', money = '+userData[key].money+', medkitused = '+userData[key].medkitused+', donate = '+userData[key].donate+', timer = '+userData[key].timer+', groupid = '+userData[key].groupid+', userid = '+key);
-}};
+fs.writeFileSync("cmds/users.json",JSON.stringify(userData),err=>{
+    if(err) throw err;
+});
+};
 function saveWorkData(workData){
-    for(key in workData){
-        connection.query('REPLACE INTO workers SET userid = '+key+', id = '+workData[key].id+', timer = '+workData[key].timer)
-}};
+fs.writeFileSync("cmds/workers.json",JSON.stringify(workData),err=>{
+    if(err) throw err;
+});
+};
 function saveGroupData(groupData){
-  for (sgid in groupData){
-    connection.query('REPLACE INTO groups SET id = '+sgid+', name = '+groupData["" + sgid].name+', players = '+groupData["" + sgid].players+'creator = '+groupData["" + sgid].creator);
-}};
+fs.writeFileSync("cmds/groups.json",JSON.stringify(groupData),err=>{
+    if(err) throw err;
+});
+};

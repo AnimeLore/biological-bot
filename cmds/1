@@ -1,0 +1,5 @@
+for(key in workData){
+    connection.query('REPLACE INTO workers SET userid = '+key+', id = '+workData[key].id+', timer = '+workData[key].timer, function(err, results) {
+        if(err) console.log(err);
+        console.log(results);
+    });}
